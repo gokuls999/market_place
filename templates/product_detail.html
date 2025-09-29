@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} - Marketplace{% endblock %}
+{% block content %}
+    <h2>{{ product.name }}</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+        <div style="flex: 1; min-width: 300px;">
+            {% if product.image_urls %}
+                <img src="{{ product.image_urls.0 }}" alt="{{ product.name }}" style="max-width: 100%; border-radius: 8px;">
+            {% else %}
+                <img src="https://via.placeholder.com/300" alt="No image">
+            {% endif %}
+        </div>
+        <div style="flex: 1; min-width: 300px;">
+            <p><strong>Price:</strong> ₹{{ product.price }}</p>
+            <p><strong>Description:</strong> {{ product.description }}</p>
+            <p><strong>Seller:</strong> {{ product.seller.business_name }}</p>
+            <p><strong>Category:</strong> {{ product.category.name }}</p>
+            {% if product.attributes %}
+                <p><strong>Attributes:</strong>
+                    <ul>
+                        {% for key, value in product.attributes.items %}
+                            <li>{{ key }}: {{ value }}</li>
+                        {% endfor %}
+                    </ul>
+                </p>
+            {% endif %}
+            <a href="{% url 'add_to_cart' product.id %}"><button class="add-to-cart">Add to Cart</button></a>
+        </div>
+    </div>
+{% endblock %}

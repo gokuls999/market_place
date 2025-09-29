@@ -1,0 +1,27 @@
+# Django
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.log
+*.pot
+media/
+staticfiles/
+
+# Virtual environment
+venv/
+ENV/
+
+# Editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Sensitive settings (optional, only if settings.py contains secrets)
+# marketplace/settings.py
+
+# Migrations (optional, exclude if you don’t want to track initial migrations)
+# inventory/migrations/

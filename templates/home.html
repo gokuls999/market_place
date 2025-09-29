@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Home - Marketplace{% endblock %}
+{% block content %}
+    <h2>Welcome to Our Marketplace</h2>
+    <p>Shop for electronics, groceries, and more with same-day delivery!</p>
+    <div class="product-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        {% for product in products %}
+            <div class="product" style="border: 1px solid #ccc; padding: 10px; text-align: center;">
+                {% if product.image_urls %}
+                    <img src="{{ product.image_urls.0 }}" alt="{{ product.name }}" style="max-width: 150px;">
+                {% else %}
+                    <img src="https://via.placeholder.com/150" alt="No image">
+                {% endif %}
+                <h3><a href="{% url 'product_detail' product.id %}">{{ product.name }}</a></h3>
+                <p>₹{{ product.price }}</p>
+                <a href="{% url 'add_to_cart' product.id %}"><button>Add to Cart</button></a>
+            </div>
+        {% empty %}
+            <p>No products available yet.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

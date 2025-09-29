@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Register - Marketplace{% endblock %}
+{% block content %}
+    <h2>Create Account</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    <form method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        <div style="margin-bottom: 10px;">
+            <label>Username:</label>
+            <input type="text" name="username" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Email:</label>
+            <input type="email" name="email" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Phone:</label>
+            <input type="text" name="phone" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Password:</label>
+            <input type="password" name="password" required>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+{% endblock %}

@@ -1,23 +1,20 @@
 {% extends 'base.html' %}
 {% block title %}Verify OTP - Marketplace{% endblock %}
 {% block content %}
-    <h2>Verify OTP</h2>
-    <p>Enter the OTPs sent to your email and phone.</p>
+    <h2>Verify Email OTP</h2>
+    <p>Enter the OTP sent to your email.</p>
     {% if messages %}
         {% for message in messages %}
             <p style="color: {{ message.tags }}">{{ message }}</p>
         {% endfor %}
     {% endif %}
-    <form method="post" action="{% url 'verify_otp' user_id %}">
+    <form method="post" action="{% url 'verify_otp' %}">
         {% csrf_token %}
         <div style="margin-bottom: 10px;">
             <label>Email OTP:</label>
             <input type="text" name="email_otp" required>
         </div>
-        <div style="margin-bottom: 10px;">
-            <label>Phone OTP:</label>
-            <input type="text" name="phone_otp" required>
-        </div>
         <button type="submit">Verify</button>
+        <a href="{% url 'register' %}">Back to Registration</a>
     </form>
 {% endblock %}

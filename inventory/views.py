@@ -7,6 +7,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .models import Products, Cart, CartItem, Users
 from django_otp.plugins.otp_email.models import EmailDevice
+from django.db.models import Q
+from .models import Categories
 import random
 def product_detail(request, product_id):
     product = get_object_or_404(Products, id=product_id, approved=True)
@@ -30,7 +32,14 @@ def cart(request):
 
 def products(request):
     products = Products.objects.filter(approved=True)
-    return render(request, 'products.html', {'products': products})
+    search_query = request.GET.get('search', '')
+    category_id = request.GET.get('category', '')
+    if search_query:
+        products = products.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query))
+    if category_id:
+        products = products.filter(category_id=category_id)
+    categories = Categories.objects.all()
+    return render(request, 'products.html', {'products': products, 'search_query': search_query, 'category_id': category_id, 'categories': categories})
 
 def login_view(request):
     if request.method == 'POST':
@@ -82,60 +91,58 @@ def register(request):
         if Users.objects.filter(email=email).exists():
             messages.error(request, 'Email already registered.')
             return render(request, 'register.html')
-        try:
+        # Store data in session for verification
+        request.session['registration_data'] = {
+            'username': username,
+            'email': email,
+            'phone': phone,
+            'password': password,
+        }
+        # Generate and send email OTP
+        email_otp = str(random.randint(100000, 999999))
+        request.session['email_otp'] = email_otp
+        send_mail(
+            'Email OTP Verification',
+            f'Your OTP is: {email_otp}',
+            settings.EMAIL_HOST_USER,
+            [email],
+            fail_silently=True,
+        )
+        print(f"DEBUG: Email OTP for {email}: {email_otp}")
+        return redirect('verify_otp')
+    return render(request, 'register.html')
+
+def verify_otp(request):
+    if request.method == 'POST':
+        email_otp = request.POST.get('email_otp')
+        registration_data = request.session.get('registration_data')
+        session_otp = request.session.get('email_otp')
+        if not registration_data or not session_otp:
+            messages.error(request, 'Session expired. Please register again.')
+            return redirect('register')
+        if email_otp == session_otp:
+            # Create user after successful OTP
+            username = registration_data['username']
+            email = registration_data['email']
+            phone = registration_data['phone']
+            password = registration_data['password']
             user = Users.objects.create(
                 username=username,
                 email=email,
                 phone=phone,
                 password=make_password(password),
                 role='customer',
-                is_verified=False
+                is_verified=True  # Set verified since OTP passed
             )
-            print(f"DEBUG: User created - ID: {user.id}")
-            # Email OTP
-            email_otp = str(random.randint(100000, 999999))
-            EmailDevice.objects.create(user=user, name='default', email=email, token=email_otp)
-            send_mail(
-                'Email OTP Verification',
-                f'Your OTP is: {email_otp}',
-                settings.EMAIL_HOST_USER,
-                [email],
-                fail_silently=True,
-            )
-            # Phone OTP (simulated via email)
-            phone_otp = str(random.randint(100000, 999999))
-            EmailDevice.objects.create(user=user, name='phone', email=phone + '@sms.example.com', token=phone_otp)
-            send_mail(
-                'Phone OTP Verification',
-                f'Your OTP is: {phone_otp}',
-                settings.EMAIL_HOST_USER,
-                [phone + '@sms.example.com'],
-                fail_silently=True,
-            )
-            print(f"DEBUG: Email OTP for {email}: {email_otp}")
-            print(f"DEBUG: Phone OTP for {phone}: {phone_otp}")
-            return redirect('verify_otp', user_id=user.id)
-        except Exception as e:
-            print(f"DEBUG: Error during registration: {str(e)}")
-            messages.error(request, f'Registration failed: {str(e)}')
-            return render(request, 'register.html')
-    return render(request, 'register.html')
-
-def verify_otp(request, user_id):
-    user = get_object_or_404(Users, id=user_id)
-    if request.method == 'POST':
-        email_otp = request.POST.get('email_otp')
-        phone_otp = request.POST.get('phone_otp')
-        email_device = EmailDevice.objects.filter(user=user, name='default').first()
-        phone_device = EmailDevice.objects.filter(user=user, name='phone').first()
-        if email_device and phone_device and email_otp == email_device.token and phone_otp == phone_device.token:
-            user.is_verified = True
-            user.save()
+            print(f"DEBUG: User created after OTP - ID: {user.id}")
+            # Clear session
+            del request.session['registration_data']
+            del request.session['email_otp']
             login(request, user)
             messages.success(request, 'Registration successful! You are now logged in.')
             return redirect('home')
         else:
             messages.error(request, 'Invalid OTP.')
-    return render(request, 'verify_otp.html', {'user_id': user_id})
+    return render(request, 'verify_otp.html')
 
 # Create your views here.

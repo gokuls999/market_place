@@ -144,4 +144,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'gokulataleta@gmail.com'  # Replace with your Gmail
 EMAIL_HOST_PASSWORD = 'bhpwdpdhlowekqdc'  # Replace with Gmail App Password
 
+SESSION_COOKIE_AGE = 3600  # 1 hour
+SESSION_SAVE_EVERY_REQUEST = True
+
  

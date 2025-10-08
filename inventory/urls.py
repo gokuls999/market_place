@@ -13,4 +13,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register, name='register'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
+    path('seller-register/', views.seller_register, name='seller_register'),
+    path('seller-dashboard/', views.seller_dashboard, name='seller_dashboard'), 
 ]

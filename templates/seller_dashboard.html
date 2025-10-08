@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Seller Dashboard - Marketplace{% endblock %}
+{% block content %}
+    <h2>Seller Dashboard</h2>
+    <p>Welcome, {{ user.username }}! Your shop: {{ user.seller.business_name }}</p>
+    <h3>Your Approved Products ({{ products.count }})</h3>
+    <a href="#" style="margin-bottom: 20px; display: inline-block;">Add New Product</a>
+    <div class="product-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        {% for product in products %}
+            <div class="product" style="border: 1px solid #ccc; padding: 10px; text-align: center;">
+                {% if product.image_urls %}
+                    <img src="{{ product.image_urls.0 }}" alt="{{ product.name }}" style="max-width: 150px;">
+                {% else %}
+                    <img src="https://via.placeholder.com/150" alt="No image">
+                {% endif %}
+                <h3><a href="{% url 'product_detail' product.id %}">{{ product.name }}</a></h3>
+                <p>₹{{ product.price }}</p>
+                <p>Sold: 0 | Rating: {{ user.seller.rating }}</p>
+                <a href="#">Edit</a> | <a href="#">View Orders</a>
+            </div>
+        {% empty %}
+            <p>No approved products yet. <a href="#">Add New Product</a></p>
+        {% endfor %}
+    </div>
+    <h3>Recent Orders</h3>
+    <p>Placeholder for orders table (e.g., 5 recent customer orders).</p>
+    <a href="#">View All Orders</a> | <a href="#">Payouts</a>
+{% endblock %}

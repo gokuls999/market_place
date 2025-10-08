@@ -147,4 +147,8 @@ EMAIL_HOST_PASSWORD = 'bhpwdpdhlowekqdc'  # Replace with Gmail App Password
 SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_SAVE_EVERY_REQUEST = True
 
+# Media files (for uploads like seller documents)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
  

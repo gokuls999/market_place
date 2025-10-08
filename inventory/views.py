@@ -5,10 +5,13 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import Products, Cart, CartItem, Users
+from .models import Products, Cart, CartItem, Users, Sellers
 from django_otp.plugins.otp_email.models import EmailDevice
+from django.views.decorators.csrf import csrf_protect
 from django.db.models import Q
 from .models import Categories
+from .models import Products, Orders
+from .models import Products, Sellers
 import random
 def product_detail(request, product_id):
     product = get_object_or_404(Products, id=product_id, approved=True)
@@ -145,4 +148,57 @@ def verify_otp(request):
             messages.error(request, 'Invalid OTP.')
     return render(request, 'verify_otp.html')
 
+@csrf_protect
+def seller_register(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        email = request.POST['email']
+        phone = request.POST['phone']
+        password = request.POST['password']
+        business_name = request.POST['business_name']
+        gst_number = request.POST['gst_number']
+        bank_details = request.POST['bank_details']
+        documents = request.FILES.get('documents')
+        print(f"DEBUG: Seller registration - Username: {username}, GST: {gst_number}")
+        if Users.objects.filter(username=username).exists():
+            messages.error(request, 'Username already taken.')
+            return render(request, 'seller_register.html')
+        if Users.objects.filter(email=email).exists():
+            messages.error(request, 'Email already registered.')
+            return render(request, 'seller_register.html')
+        if Sellers.objects.filter(gst_number=gst_number).exists():
+            messages.error(request, 'GST number already registered.')
+            return render(request, 'seller_register.html')
+        try:
+            user = Users.objects.create(
+                username=username,
+                email=email,
+                phone=phone,
+                password=make_password(password),
+                role='seller',
+                is_verified=True  # Assume verified for onboarding
+            )
+            seller = Sellers.objects.create(
+                user=user,
+                business_name=business_name,
+                gst_number=gst_number,
+                bank_details=bank_details,
+                documents=documents
+            )
+            print(f"DEBUG: Seller created - ID: {seller.user.id}")
+            messages.success(request, 'Seller registration submitted. Waiting for admin approval.')
+            return redirect('home')
+        except Exception as e:
+            print(f"DEBUG: Error during seller registration: {str(e)}")
+            messages.error(request, f'Registration failed: {str(e)}')
+            return render(request, 'seller_register.html')
+    return render(request, 'seller_register.html')
 # Create your views here.
+
+@login_required
+def seller_dashboard(request):
+    if request.user.role != 'seller' or not request.user.seller.approved:
+        messages.error(request, 'Access denied. Only approved sellers can view this dashboard.')
+        return redirect('home')
+    products = Products.objects.filter(seller=request.user.seller, approved=True)
+    return render(request, 'seller_dashboard.html', {'products': products}) 

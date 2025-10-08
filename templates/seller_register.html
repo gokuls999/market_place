@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Seller Registration - Marketplace{% endblock %}
+{% block content %}
+    <h2>Seller Onboarding</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div style="margin-bottom: 10px;">
+            <label>Username:</label>
+            <input type="text" name="username" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Email:</label>
+            <input type="email" name="email" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Phone:</label>
+            <input type="text" name="phone" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Password:</label>
+            <input type="password" name="password" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Business Name:</label>
+            <input type="text" name="business_name" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>GST Number:</label>
+            <input type="text" name="gst_number" required>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Bank Details:</label>
+            <textarea name="bank_details" required></textarea>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label>Business Documents (GST, License, etc.):</label>
+            <input type="file" name="documents" multiple>
+        </div>
+        <button type="submit">Submit for Approval</button>
+    </form>
+    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+{% endblock %}
